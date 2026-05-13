@@ -13,9 +13,11 @@ export default function Login() {
         borderRadius: 20, padding: '44px 36px', textAlign: 'center',
         width: 380, maxWidth: '95vw'
       }}>
-        <div style={{ fontSize: 40, fontWeight: 800, marginBottom: 4 }}>
-          Renta<span style={{ color: 'var(--brand)' }}>Pro</span>
-        </div>
+        <img
+          src="/icono.png"
+          alt="RentaPro"
+          style={{ height: 130, width: 130, objectFit: 'contain', marginBottom: 16, borderRadius: 24 }}
+        />
         <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 36 }}>
           Arrienda · Controla · Gana
         </div>

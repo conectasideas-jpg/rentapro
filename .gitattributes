@@ -1,0 +1,11 @@
+# Normalize line endings.
+# Use LF in the repository and let Git convert to CRLF on checkout when needed.
+* text=auto
+*.json text eol=lf
+*.jsx text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

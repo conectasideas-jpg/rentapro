@@ -17,16 +17,14 @@ export default function Layout({ children }) {
     { path: '/equipos', icon: 'ti-tool', label: 'Equipos' },
     { path: '/clientes', icon: 'ti-users', label: 'Clientes' },
     { path: '/combos', icon: 'ti-package', label: 'Combos' },
+    { path: '/reportes', icon: 'ti-chart-line', label: 'Reportes', sep: true },
     ...(isAdmin ? [{ path: '/usuarios', icon: 'ti-shield-lock', label: 'Usuarios', sep: true }] : []),
   ]
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div className="app-layout">
       {/* SIDEBAR */}
-      <div style={{
-        width: 210, background: 'var(--surface)', borderRight: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column', flexShrink: 0
-      }}>
+      <div className="app-sidebar">
         <div style={{ padding: '18px 14px 14px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 20, fontWeight: 800 }}>
             Renta<span style={{ color: 'var(--brand)' }}>Pro</span>
@@ -53,7 +51,6 @@ export default function Layout({ children }) {
                     fontWeight: active ? 700 : 500,
                     borderLeft: active ? '3px solid var(--brand)' : '3px solid transparent',
                     border: active ? undefined : '1px solid transparent',
-                    borderLeft: active ? '3px solid var(--brand)' : '3px solid transparent',
                     fontSize: 13, width: '100%', textAlign: 'left', cursor: 'pointer',
                     transition: 'all .12s'
                   }}
@@ -93,7 +90,7 @@ export default function Layout({ children }) {
       </div>
 
       {/* MAIN */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="app-main">
         {children}
       </div>
     </div>

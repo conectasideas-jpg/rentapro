@@ -9,6 +9,7 @@ import Equipos from './pages/Equipos'
 import Clientes from './pages/Clientes'
 import Combos from './pages/Combos'
 import Usuarios from './pages/Usuarios'
+import Reportes from './pages/Reportes'
 
 function AppRoutes() {
   const { session, usuario, loading } = useAuth()
@@ -33,6 +34,7 @@ function AppRoutes() {
         <Route path="/equipos" element={<Equipos />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/combos" element={<Combos />} />
+        <Route path="/reportes" element={<Reportes />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
