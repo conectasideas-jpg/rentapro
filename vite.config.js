@@ -8,12 +8,13 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Mi App',
-        short_name: 'MiApp',
+        name: 'RentaPro',
+        short_name: 'RentaPro',
+        description: 'Gestión de arriendos y control de inventario',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#000000',
+        background_color: '#0f172a',
+        theme_color: '#22c55e',
         icons: [
           {
             src: '/icon-192.png',
