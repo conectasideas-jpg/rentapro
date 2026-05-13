@@ -7,6 +7,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      includeAssets: ['favicon.svg', 'logo.svg', 'icon-192.png', 'icon-512.png'],
+      workbox: {
+        cleanupOutdatedCaches: true,
+        navigateFallback: '/'
+      },
       manifest: {
         name: 'RentaPro',
         short_name: 'RentaPro',
@@ -16,6 +22,11 @@ export default defineConfig({
         background_color: '#0f172a',
         theme_color: '#22c55e',
         icons: [
+          {
+            src: '/logo.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
+          },
           {
             src: '/icon-192.png',
             sizes: '192x192',

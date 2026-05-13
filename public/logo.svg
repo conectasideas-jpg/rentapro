@@ -1,39 +1,21 @@
-<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="400" height="200" fill="#0f172a" rx="20"/>
-  
-  <!-- Gear symbol (left) -->
-  <circle cx="60" cy="80" r="25" fill="none" stroke="#fbbf24" stroke-width="3"/>
-  <circle cx="60" cy="80" r="15" fill="none" stroke="#fbbf24" stroke-width="2"/>
-  <rect x="35" y="75" width="50" height="10" fill="#fbbf24" transform="rotate(0 60 80)"/>
-  <rect x="35" y="75" width="50" height="10" fill="#fbbf24" transform="rotate(45 60 80)"/>
-  <rect x="35" y="75" width="50" height="10" fill="#fbbf24" transform="rotate(90 60 80)"/>
-  <rect x="35" y="75" width="50" height="10" fill="#fbbf24" transform="rotate(135 60 80)"/>
-  
-  <!-- Crane/Scaffolding (center-right) -->
-  <rect x="140" y="50" width="8" height="80" fill="#f59e0b"/>
-  <rect x="128" y="50" width="50" height="8" fill="#f59e0b"/>
-  <line x1="165" y1="50" x2="165" y2="130" stroke="#94a3b8" stroke-width="3"/>
-  <line x1="180" y1="50" x2="180" y2="130" stroke="#94a3b8" stroke-width="3"/>
-  <line x1="140" y1="70" x2="185" y2="70" stroke="#94a3b8" stroke-width="2"/>
-  <line x1="140" y1="90" x2="185" y2="90" stroke="#94a3b8" stroke-width="2"/>
-  <line x1="140" y1="110" x2="185" y2="110" stroke="#94a3b8" stroke-width="2"/>
-  
-  <!-- Drill/Tool (right) -->
-  <circle cx="280" cy="100" r="12" fill="#f59e0b"/>
-  <rect x="290" y="95" width="25" height="10" fill="#1f2937"/>
-  <circle cx="265" cy="85" r="8" fill="#f59e0b"/>
-  <polygon points="305,100 325,90 325,110" fill="#059669"/>
-  
-  <!-- Arc/Bracket decorative -->
-  <path d="M 50 140 Q 100 160 200 140 Q 250 120 300 140" stroke="#22c55e" stroke-width="3" fill="none" stroke-linecap="round"/>
-  
-  <!-- Check mark accent -->
-  <circle cx="200" cy="165" r="8" fill="none" stroke="#22c55e" stroke-width="2"/>
-  <path d="M 196 165 L 199 168 L 204 163" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Text: RentaPro -->
-  <text x="200" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">
-    Renta<tspan fill="#fbbf24">Pro</tspan>
-  </text>
+﻿<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#38d39f" />
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="200" fill="#0f172a" />
+  <circle cx="512" cy="380" r="240" fill="url(#g1)" opacity="0.3" />
+  <path d="M320 300h120l70 180 18 45 14 35 8 20h-98v-52h-70v-228z" fill="#fff" opacity="0.95" />
+  <path d="M492 300h108c32 0 56 10 72 30 18 24 26 52 26 84 0 34-11 62-32 84-22 22-52 34-90 34h-94v-232zm94 90c22 0 38-6 48-18 10-12 16-27 16-45 0-18-6-33-16-45-10-12-26-18-48-18h-38v126h38zm0 118c26 0 44-8 56-24 12-16 18-35 18-58 0-24-6-43-18-58-12-16-30-24-56-24h-38v164h38z" fill="#fff" />
+  <path d="M305 635h414v140c0 35-28 63-63 63H368c-35 0-63-28-63-63V635z" fill="#111827" opacity="0.9" />
+  <path d="M305 635h414v24c0 12-10 22-22 22H327c-12 0-22-10-22-22v-24z" fill="url(#g2)" />
+  <path d="M250 730h524v24H250z" fill="#222" opacity="0.3" />
+  <text x="512" y="890" font-family="Arial, sans-serif" font-size="110" text-anchor="middle" fill="#fff" font-weight="800">RENTA</text>
+  <text x="512" y="980" font-family="Arial, sans-serif" font-size="110" text-anchor="middle" fill="#22c55e" font-weight="900">PRO</text>
 </svg>

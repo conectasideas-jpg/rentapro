@@ -1,96 +1,124 @@
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 const ROLES = { admin: 'Administrador', operador: 'Operador', readonly: 'Solo lectura' }
-
 const initials = name => name?.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase() || 'RP'
+
+const NAV_ITEMS = [
+  { path: '/', icon: 'ti-layout-dashboard', label: 'Dashboard' },
+  { path: '/arriendos', icon: 'ti-clipboard-list', label: 'Arriendos' },
+  { path: '/equipos', icon: 'ti-tool', label: 'Equipos' },
+  { path: '/clientes', icon: 'ti-users', label: 'Clientes' },
+  { path: '/combos', icon: 'ti-package', label: 'Ofertas' },
+]
+
+const NAV_REPORTS = [
+  { path: '/reportes', icon: 'ti-chart-bar', label: 'Reportes' },
+]
+
+const NAV_ADMIN = [
+  { path: '/usuarios', icon: 'ti-shield-lock', label: 'Usuarios' },
+]
 
 export default function Layout({ children }) {
   const { usuario, signOut } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const [mobileOpen, setMobileOpen] = useState(false)
   const isAdmin = usuario?.rol === 'admin'
 
-  const navItems = [
-    { path: '/', icon: 'ti-chart-bar', label: 'Dashboard' },
-    { path: '/arriendos', icon: 'ti-clipboard-list', label: 'Arriendos' },
-    { path: '/equipos', icon: 'ti-tool', label: 'Equipos' },
-    { path: '/clientes', icon: 'ti-users', label: 'Clientes' },
-    { path: '/combos', icon: 'ti-package', label: 'Ofertas' },
-    { path: '/reportes', icon: 'ti-chart-line', label: 'Reportes', sep: true },
-    ...(isAdmin ? [{ path: '/usuarios', icon: 'ti-shield-lock', label: 'Usuarios', sep: true }] : []),
-  ]
+  const allNavItems = [...NAV_ITEMS, ...NAV_REPORTS, ...(isAdmin ? NAV_ADMIN : [])]
+  const currentTitle = useMemo(
+    () => allNavItems.find(item => item.path === location.pathname)?.label || 'Dashboard',
+    [location.pathname]
+  )
+
+  const closeMobileMenu = () => setMobileOpen(false)
+  const goTo = (path) => { navigate(path); closeMobileMenu() }
+
+  const renderNavGroup = (items) =>
+    items.map(item => {
+      const active = location.pathname === item.path
+      return (
+        <button
+          key={item.path}
+          className={`nav-item ${active ? 'active' : ''}`}
+          onClick={() => goTo(item.path)}
+        >
+          <i className={`ti ${item.icon} nav-icon`} />
+          {item.label}
+        </button>
+      )
+    })
 
   return (
     <div className="app-layout">
-      {/* SIDEBAR */}
-      <div className="app-sidebar">
-        <div style={{ padding: '18px 14px 14px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>
-            Renta<span style={{ color: 'var(--brand)' }}>Pro</span>
-          </div>
-          <div style={{ fontSize: 10, color: 'var(--text3)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 3 }}>
-            Gestión de arriendos
-          </div>
-        </div>
 
-        <nav style={{ flex: 1, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {navItems.map(item => {
-            const active = location.pathname === item.path
-            return (
-              <div key={item.path}>
-                {item.sep && <div style={{ height: 1, background: 'var(--border)', margin: '6px 4px' }} />}
-                <button
-                  onClick={() => navigate(item.path)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 9,
-                    padding: active ? '9px 9px 9px 9px' : '9px 10px',
-                    borderRadius: active ? '0 var(--radius) var(--radius) 0' : 'var(--radius)',
-                    background: active ? 'var(--brand-light)' : 'none',
-                    color: active ? 'var(--brand-text)' : 'var(--text2)',
-                    fontWeight: active ? 700 : 500,
-                    borderLeft: active ? '3px solid var(--brand)' : '3px solid transparent',
-                    border: active ? undefined : '1px solid transparent',
-                    fontSize: 13, width: '100%', textAlign: 'left', cursor: 'pointer',
-                    transition: 'all .12s'
-                  }}
-                >
-                  <i className={`ti ${item.icon}`} style={{ fontSize: 17 }} />
-                  {item.label}
-                </button>
-              </div>
-            )
-          })}
-        </nav>
-
-        <div style={{ padding: 10, borderTop: '1px solid var(--border)' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: 8, borderRadius: 'var(--radius)', background: 'var(--surface2)'
-          }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: '50%', background: 'var(--brand)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: 11, color: '#fff', flexShrink: 0
-            }}>
-              {initials(usuario?.nombre)}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {usuario?.nombre}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--text3)' }}>{ROLES[usuario?.rol]}</div>
-            </div>
-          </div>
-          <button className="btn btn-sm" onClick={signOut}
-            style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-            <i className="ti ti-logout" /> Salir
-          </button>
+      {/* MOBILE HEADER */}
+      <div className="mobile-header">
+        <button className="mobile-menu-btn" onClick={() => setMobileOpen(o => !o)}>
+          <i className={`ti ${mobileOpen ? 'ti-x' : 'ti-menu-2'}`} />
+        </button>
+        <div className="mobile-header-logo">
+          <img src="/icono.png" alt="RentaPro" className="sidebar-logo-img" />
+          <span className="mobile-header-title">{currentTitle}</span>
         </div>
+        <div className="mobile-header-avatar">{initials(usuario?.nombre)}</div>
       </div>
 
+      {/* SIDEBAR */}
+      <aside className={`app-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
+
+        {/* Logo */}
+        <div className="sidebar-logo">
+          <img src="/icono.png" alt="RentaPro logo" className="sidebar-logo-img" />
+          <div className="sidebar-logo-text">
+            <div className="sidebar-logo-name">Renta<span>Pro</span></div>
+            <div className="sidebar-logo-tagline">Gestión de arriendos</div>
+          </div>
+        </div>
+
+        {/* Nav principal */}
+        <nav className="sidebar-nav">
+          <div className="sidebar-section-label">Principal</div>
+          {renderNavGroup(NAV_ITEMS)}
+
+          <div className="sidebar-sep" />
+          <div className="sidebar-section-label">Análisis</div>
+          {renderNavGroup(NAV_REPORTS)}
+
+          {isAdmin && (
+            <>
+              <div className="sidebar-sep" />
+              <div className="sidebar-section-label">Admin</div>
+              {renderNavGroup(NAV_ADMIN)}
+            </>
+          )}
+        </nav>
+
+        {/* User section */}
+        <div className="sidebar-user">
+          <div className="user-card">
+            <div className="user-avatar">{initials(usuario?.nombre)}</div>
+            <div style={{ minWidth: 0 }}>
+              <div className="user-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {usuario?.nombre}
+              </div>
+              <div className="user-role">{ROLES[usuario?.rol]}</div>
+            </div>
+          </div>
+          <button className="btn btn-sm" onClick={signOut} style={{ width: '100%', justifyContent: 'center' }}>
+            <i className="ti ti-logout" /> Cerrar sesión
+          </button>
+        </div>
+      </aside>
+
+      {/* Overlay mobile */}
+      <div className={`sidebar-overlay ${mobileOpen ? 'open' : ''}`} onClick={closeMobileMenu} />
+
       {/* MAIN */}
-      <div className="app-main">
+      <div className="app-main" onClick={mobileOpen ? closeMobileMenu : undefined}>
         {children}
       </div>
     </div>
