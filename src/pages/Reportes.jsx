@@ -15,7 +15,7 @@ export default function Reportes() {
     { id: 'arriendos',      label: 'Arriendos',     icon: 'ti-clipboard-list' },
     { id: 'clientes',       label: 'Clientes',      icon: 'ti-users' },
     { id: 'equipos',        label: 'Equipos',       icon: 'ti-tool' },
-    { id: 'combos',         label: 'Combos',        icon: 'ti-package' },
+    { id: 'combos',         label: 'Ofertas',       icon: 'ti-package' },
     { id: 'disponibilidad', label: 'Disponibilidad',icon: 'ti-calendar-check' },
     { id: 'rentabilidad',   label: 'Rentabilidad',  icon: 'ti-coin' },
     { id: 'flujo',          label: 'Flujo de Caja', icon: 'ti-trending-up' },

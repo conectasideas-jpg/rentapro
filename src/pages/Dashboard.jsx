@@ -36,7 +36,32 @@ export default function Dashboard() {
   const ingMes = arriendos.filter(a => a.fecha_inicio?.startsWith(mes)).reduce((s, a) => s + (a.total || 0), 0)
 
   async function devolver(id) {
+    const { data: arriendo, error: arriendoErr } = await supabase
+      .from('arriendos')
+      .select('tipo, equipo_id')
+      .eq('id', id)
+      .single()
+
+    if (arriendoErr) {
+      console.error(arriendoErr)
+      return
+    }
+
     await supabase.from('arriendos').update({ estado: 'devuelto' }).eq('id', id)
+
+    if (arriendo?.tipo === 'equipo' && arriendo.equipo_id) {
+      const { data: equipo, error: equipoErr } = await supabase
+        .from('equipos')
+        .select('rentados')
+        .eq('id', arriendo.equipo_id)
+        .single()
+
+      if (!equipoErr && equipo) {
+        const rentados = Math.max(0, (equipo.rentados || 0) - 1)
+        await supabase.from('equipos').update({ rentados }).eq('id', arriendo.equipo_id)
+      }
+    }
+
     load()
   }
 

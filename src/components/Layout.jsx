@@ -16,7 +16,7 @@ export default function Layout({ children }) {
     { path: '/arriendos', icon: 'ti-clipboard-list', label: 'Arriendos' },
     { path: '/equipos', icon: 'ti-tool', label: 'Equipos' },
     { path: '/clientes', icon: 'ti-users', label: 'Clientes' },
-    { path: '/combos', icon: 'ti-package', label: 'Combos' },
+    { path: '/combos', icon: 'ti-package', label: 'Ofertas' },
     { path: '/reportes', icon: 'ti-chart-line', label: 'Reportes', sep: true },
     ...(isAdmin ? [{ path: '/usuarios', icon: 'ti-shield-lock', label: 'Usuarios', sep: true }] : []),
   ]

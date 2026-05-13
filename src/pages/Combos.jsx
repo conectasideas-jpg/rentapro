@@ -69,7 +69,7 @@ export default function Combos() {
       comboId = data.id
     }
     await supabase.from('combo_equipos').insert(form.equiposIds.map(eid => ({ combo_id: comboId, equipo_id: eid })))
-    toast(form.id ? 'Combo actualizado' : 'Combo creado')
+    toast(form.id ? 'Oferta actualizada' : 'Oferta creada')
     setSaving(false)
     setModal(false)
     load()
@@ -78,18 +78,18 @@ export default function Combos() {
   async function eliminar(id, nombre) {
     if (!confirm(`¿Eliminar el combo "${nombre}"?`)) return
     await supabase.from('combos').delete().eq('id', id)
-    toast('Combo eliminado')
+    toast('Oferta eliminada')
     load()
   }
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <PageHeader title="Combos" actions={
-        isAdmin && <button className="btn btn-primary" onClick={openNew}><i className="ti ti-plus" /> Agregar combo</button>
+      <PageHeader title="Ofertas" actions={
+        isAdmin && <button className="btn btn-primary" onClick={openNew}><i className="ti ti-plus" /> Agregar oferta</button>
       } />
       <div style={{ flex: 1, overflow: 'auto', padding: '20px 22px' }}>
         {loading ? <div style={{ padding: 40, textAlign: 'center' }}><div className="spinner" /></div> : (
-          combos.length === 0 ? <div className="empty-state"><i className="ti ti-package" style={{ fontSize: 36, display: 'block', marginBottom: 8 }} />Sin combos. {isAdmin && 'Agrega el primero.'}</div> :
+          combos.length === 0 ? <div className="empty-state"><i className="ti ti-package" style={{ fontSize: 36, display: 'block', marginBottom: 8 }} />Sin ofertas. {isAdmin && 'Agrega la primera.'}</div> :
             combos.map(c => {
               const eqs = c.combo_equipos || []
               const baseP = eqs.reduce((s, ce) => s + (ce.equipos?.precio_dia || 0), 0)
@@ -123,7 +123,7 @@ export default function Combos() {
 
       {modal && (
         <Modal
-          title={<><i className="ti ti-package" /> {form.id ? 'Editar' : 'Nuevo'} combo</>}
+          title={<><i className="ti ti-package" /> {form.id ? 'Editar' : 'Nueva'} oferta</>}
           onClose={() => setModal(false)}
           actions={<>
             <button className="btn" onClick={() => setModal(false)}>Cancelar</button>

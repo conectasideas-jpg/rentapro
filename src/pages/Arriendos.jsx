@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import PageHeader from '../components/PageHeader'
@@ -8,6 +9,7 @@ import { toast } from '../components/Toast'
 const fmt = n => '$' + Math.round(n || 0).toLocaleString('es-CL')
 
 export default function Arriendos() {
+  const navigate = useNavigate()
   const { usuario, can } = useAuth()
   const isAdmin = usuario?.rol === 'admin'
   const [arriendos, setArriendos] = useState([])
@@ -17,6 +19,7 @@ export default function Arriendos() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [recalculando, setRecalculando] = useState(false)
   const [form, setForm] = useState({ clienteId: '', fecha: today(), tipo: 'equipo', equipoId: '', comboId: '', dias: 1, notas: '' })
 
   function today() { return new Date().toISOString().split('T')[0] }
@@ -56,7 +59,7 @@ export default function Arriendos() {
   async function save() {
     if (!form.clienteId) { toast('Selecciona un cliente'); return }
     if (form.tipo === 'equipo' && !form.equipoId) { toast('Selecciona un equipo'); return }
-    if (form.tipo === 'combo' && !form.comboId) { toast('Selecciona un combo'); return }
+    if (form.tipo === 'combo' && !form.comboId) { toast('Selecciona una oferta'); return }
     setSaving(true)
     const fechaFin = new Date(form.fecha)
     fechaFin.setDate(fechaFin.getDate() + dias)
@@ -97,13 +100,100 @@ export default function Arriendos() {
 
   async function devolver(id) {
     if (!confirm('¿Confirmar devolución?')) return
+
+    const { data: arriendo, error: arriendoErr } = await supabase
+      .from('arriendos')
+      .select('tipo, equipo_id')
+      .eq('id', id)
+      .single()
+
+    if (arriendoErr) {
+      console.error(arriendoErr)
+      toast('No se pudo procesar la devolución')
+      return
+    }
+
     await supabase.from('arriendos').update({ estado: 'devuelto' }).eq('id', id)
+
+    if (arriendo?.tipo === 'equipo' && arriendo.equipo_id) {
+      const { data: equipo, error: equipoErr } = await supabase
+        .from('equipos')
+        .select('rentados')
+        .eq('id', arriendo.equipo_id)
+        .single()
+
+      if (!equipoErr && equipo) {
+        const rentados = Math.max(0, (equipo.rentados || 0) - 1)
+        await supabase.from('equipos').update({ rentados }).eq('id', arriendo.equipo_id)
+      }
+    }
+
     toast('Devolución registrada')
     load()
   }
 
+  async function recalcularRentados() {
+    setRecalculando(true)
+    try {
+      const [{ data: equiposData, error: EquiposErr }, { data: arriendosActivos, error: arriendosErr }] = await Promise.all([
+        supabase.from('equipos').select('id'),
+        supabase.from('arriendos').select('equipo_id').eq('estado', 'activo')
+      ])
+
+      if (EquiposErr || arriendosErr) throw EquiposErr || arriendosErr
+
+      const counts = (arriendosActivos || []).reduce((acc, a) => {
+        if (a.equipo_id) acc[a.equipo_id] = (acc[a.equipo_id] || 0) + 1
+        return acc
+      }, {})
+
+      await Promise.all((equiposData || []).map(e =>
+        supabase.from('equipos').update({ rentados: counts[e.id] || 0 }).eq('id', e.id)
+      ))
+
+      toast('Rentados recalculados correctamente')
+      load()
+    } catch (err) {
+      console.error(err)
+      toast('Error recalculando rentados')
+    } finally {
+      setRecalculando(false)
+    }
+  }
+
+  async function decrementarRentados(equipoId) {
+    if (!equipoId) return
+    const { data: equipo, error: equipoErr } = await supabase
+      .from('equipos')
+      .select('rentados')
+      .eq('id', equipoId)
+      .single()
+
+    if (!equipoErr && equipo) {
+      const rentados = Math.max(0, (equipo.rentados || 0) - 1)
+      await supabase.from('equipos').update({ rentados }).eq('id', equipoId)
+    }
+  }
+
   async function eliminar(id) {
     if (!confirm('¿Eliminar este arriendo?')) return
+
+    const { data: arriendo, error: arriendoErr } = await supabase
+      .from('arriendos')
+      .select('tipo, equipo_id')
+      .eq('id', id)
+      .single()
+
+    if (arriendoErr) {
+      console.error(arriendoErr)
+      toast('No se pudo eliminar el arriendo')
+      return
+    }
+
+    if (arriendo?.tipo === 'equipo' && arriendo?.equipo_id) {
+      await decrementarRentados(arriendo.equipo_id)
+    }
+
     await supabase.from('arriendos').delete().eq('id', id)
     toast('Arriendo eliminado')
     load()
@@ -115,7 +205,15 @@ export default function Arriendos() {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <PageHeader title="Arriendos" actions={
-        can('arriendos') && <button className="btn btn-primary" onClick={() => setModal(true)}><i className="ti ti-plus" /> Nuevo arriendo</button>
+        <>
+          {can('clientes') && <button className="btn" onClick={() => navigate('/clientes')}><i className="ti ti-user-plus" /> Agregar cliente</button>}
+          {can('arriendos') && <button className="btn btn-primary" onClick={() => setModal(true)}><i className="ti ti-plus" /> Nuevo arriendo</button>}
+          {isAdmin && (
+            <button className="btn btn-sm btn-warning" onClick={recalcularRentados} disabled={recalculando}>
+              {recalculando ? 'Recalculando...' : 'Recalcular rentados'}
+            </button>
+          )}
+        </>
       } />
       <div style={{ flex: 1, overflow: 'auto', padding: '20px 22px' }}>
         <div className="tcard">
@@ -123,7 +221,7 @@ export default function Arriendos() {
             <table>
               <thead><tr>
                 <th style={{ width: '10%' }}>Fecha</th><th style={{ width: '18%' }}>Cliente</th>
-                <th style={{ width: '20%' }}>Equipo / combo</th><th style={{ width: '7%' }}>Días</th>
+                <th style={{ width: '20%' }}>Equipo / oferta</th><th style={{ width: '7%' }}>Días</th>
                 <th style={{ width: '12%' }}>Total</th><th style={{ width: '11%' }}>Término</th>
                 <th style={{ width: '9%' }}>Estado</th><th style={{ width: '13%' }}>Acciones</th>
               </tr></thead>
@@ -136,7 +234,7 @@ export default function Arriendos() {
                     <tr key={a.id}>
                       <td>{a.fecha_inicio}</td>
                       <td>{a.clientes?.nombre || '—'}</td>
-                      <td>{a.nombre_item} {a.tipo === 'combo' && <span className="badge b-combo">combo</span>}</td>
+                      <td>{a.nombre_item} {a.tipo === 'combo' && <span className="badge b-combo">oferta</span>}</td>
                       <td>{a.dias}</td>
                       <td style={{ fontWeight: 700, color: 'var(--brand)' }}>{fmt(a.total)}</td>
                       <td>{a.fecha_fin}</td>
@@ -182,7 +280,7 @@ export default function Arriendos() {
               <label>Tipo</label>
               <select value={form.tipo} onChange={e => f('tipo', e.target.value)}>
                 <option value="equipo">Equipo individual</option>
-                <option value="combo">Combo</option>
+                <option value="combo">Oferta</option>
               </select>
             </div>
             {form.tipo === 'equipo' ? (
@@ -195,7 +293,7 @@ export default function Arriendos() {
               </div>
             ) : (
               <div className="fg">
-                <label>Combo *</label>
+                <label>Oferta *</label>
                 <select value={form.comboId} onChange={e => f('comboId', e.target.value)}>
                   <option value="">Seleccionar...</option>
                   {combos.map(c => {

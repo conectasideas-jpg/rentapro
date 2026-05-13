@@ -48,14 +48,14 @@ export default function ReportesCombos() {
 
   const exportarCombos = () => {
     const datos = combosMasArrendados.map(c => ({
-      'Combo': c.nombre,
+      'Oferta': c.nombre,
       'Descripción': c.descripcion,
       'Descuento %': c.descuento,
       'Arriendos': c.arriendos,
       'Total Recaudado': `$${c.totalRecaudado.toFixed(2)}`,
       'Promedio/Arriendo': `$${c.promedioArriendo}`
     }))
-    exportToExcel(datos, `reporte-combos-${new Date().toISOString().split('T')[0]}`)
+    exportToExcel(datos, `reporte-ofertas-${new Date().toISOString().split('T')[0]}`)
   }
 
   if (loading) return <div style={{ padding: 20 }}>Cargando reportes...</div>
@@ -66,11 +66,11 @@ export default function ReportesCombos() {
   return (
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
-        <h2 style={{ marginBottom: 12 }}>Combos Más Arrendados</h2>
+        <h2 style={{ marginBottom: 12 }}>Ofertas Más Arrendadas</h2>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 20 }}>
           <div style={{ background: 'var(--surface2)', padding: 16, borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 4 }}>Total Combos</div>
+            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 4 }}>Total Ofertas</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--brand)' }}>{combosMasArrendados.length}</div>
           </div>
           <div style={{ background: 'var(--surface2)', padding: 16, borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
@@ -111,7 +111,7 @@ export default function ReportesCombos() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: 'var(--surface2)', borderBottom: '2px solid var(--border)' }}>
-                      <th style={{ padding: 12, textAlign: 'left', fontWeight: 600 }}>Combo</th>
+                      <th style={{ padding: 12, textAlign: 'left', fontWeight: 600 }}>Oferta</th>
                       <th style={{ padding: 12, textAlign: 'center', fontWeight: 600 }}>Arriendos</th>
                       <th style={{ padding: 12, textAlign: 'right', fontWeight: 600 }}>Total Recaudado</th>
                       <th style={{ padding: 12, textAlign: 'right', fontWeight: 600 }}>Promedio</th>
