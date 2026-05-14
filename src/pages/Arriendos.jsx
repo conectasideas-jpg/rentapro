@@ -61,35 +61,43 @@ export default function Arriendos() {
     if (form.tipo === 'equipo' && !form.equipoId) { toast('Selecciona un equipo'); return }
     if (form.tipo === 'combo' && !form.comboId) { toast('Selecciona una oferta'); return }
     setSaving(true)
-    const fechaFin = new Date(form.fecha)
-    fechaFin.setDate(fechaFin.getDate() + dias)
-    const nombreItem = form.tipo === 'equipo'
-      ? equipos.find(e => e.id === form.equipoId)?.nombre
-      : combos.find(c => c.id === form.comboId)?.nombre
+    try {
+      const fechaFin = new Date(form.fecha)
+      fechaFin.setDate(fechaFin.getDate() + dias)
+      const nombreItem = form.tipo === 'equipo'
+        ? equipos.find(e => e.id === form.equipoId)?.nombre
+        : combos.find(c => c.id === form.comboId)?.nombre
 
-    const payload = {
-      cliente_id: form.clienteId, tipo: form.tipo,
-      equipo_id: form.tipo === 'equipo' ? form.equipoId : null,
-      combo_id: form.tipo === 'combo' ? form.comboId : null,
-      nombre_item: nombreItem, fecha_inicio: form.fecha,
-      fecha_fin: fechaFin.toISOString().split('T')[0],
-      dias, precio_dia: precio, total, notas: form.notas,
-      estado: 'activo', creado_por: usuario?.id,
+      const payload = {
+        cliente_id: form.clienteId, tipo: form.tipo,
+        equipo_id: form.tipo === 'equipo' ? form.equipoId : null,
+        combo_id: form.tipo === 'combo' ? form.comboId : null,
+        nombre_item: nombreItem, fecha_inicio: form.fecha,
+        fecha_fin: fechaFin.toISOString().split('T')[0],
+        dias, precio_dia: precio, total, notas: form.notas,
+        estado: 'activo', creado_por: usuario?.id,
+      }
+      const { error: errArr } = await supabase.from('arriendos').insert(payload)
+      if (errArr) throw new Error(errArr.message)
+
+      const cli = clientes.find(c => c.id === form.clienteId)
+      if (cli) {
+        await supabase.from('clientes').update({ n_arriendos: (cli.n_arriendos || 0) + 1, total_pagado: (cli.total_pagado || 0) + total }).eq('id', form.clienteId)
+      }
+      if (form.tipo === 'equipo') {
+        const eq = equipos.find(e => e.id === form.equipoId)
+        if (eq) await supabase.from('equipos').update({ rentados: (eq.rentados || 0) + 1 }).eq('id', form.equipoId)
+      }
+      toast('Arriendo guardado ✓')
+      setModal(false)
+      setForm({ clienteId: '', fecha: today(), tipo: 'equipo', equipoId: '', comboId: '', dias: 1, notas: '' })
+      invalidateMany('arriendos', 'arriendos-activos', 'equipos', 'equipos-basic', 'clientes')
+    } catch (err) {
+      console.error('[Arriendos.save]', err)
+      toast('Error: ' + (err.message || 'No se pudo guardar el arriendo'))
+    } finally {
+      setSaving(false)
     }
-    await supabase.from('arriendos').insert(payload)
-    const cli = clientes.find(c => c.id === form.clienteId)
-    if (cli) {
-      await supabase.from('clientes').update({ n_arriendos: (cli.n_arriendos || 0) + 1, total_pagado: (cli.total_pagado || 0) + total }).eq('id', form.clienteId)
-    }
-    if (form.tipo === 'equipo') {
-      const eq = equipos.find(e => e.id === form.equipoId)
-      if (eq) await supabase.from('equipos').update({ rentados: (eq.rentados || 0) + 1 }).eq('id', form.equipoId)
-    }
-    toast('Arriendo guardado')
-    setSaving(false)
-    setModal(false)
-    setForm({ clienteId: '', fecha: today(), tipo: 'equipo', equipoId: '', comboId: '', dias: 1, notas: '' })
-    invalidateMany('arriendos', 'arriendos-activos', 'equipos', 'equipos-basic', 'clientes')
   }
 
   async function devolver(id) {

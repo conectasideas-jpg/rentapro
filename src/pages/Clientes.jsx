@@ -31,16 +31,25 @@ export default function Clientes() {
   async function save() {
     if (!form.nombre) { toast('El nombre es obligatorio'); return }
     setSaving(true)
-    const payload = { nombre: form.nombre, telefono: form.telefono, rut: form.rut, comuna: form.comuna, direccion: form.direccion }
-    if (form.id) {
-      await supabase.from('clientes').update(payload).eq('id', form.id)
-      toast('Cliente actualizado')
-    } else {
-      await supabase.from('clientes').insert({ ...payload, n_arriendos: 0, total_pagado: 0 })
-      toast('Cliente guardado')
+    try {
+      const payload = { nombre: form.nombre, telefono: form.telefono, rut: form.rut, comuna: form.comuna, direccion: form.direccion }
+      if (form.id) {
+        const { error } = await supabase.from('clientes').update(payload).eq('id', form.id)
+        if (error) throw new Error(error.message)
+        toast('Cliente actualizado ✓')
+      } else {
+        const { error } = await supabase.from('clientes').insert({ ...payload, n_arriendos: 0, total_pagado: 0 })
+        if (error) throw new Error(error.message)
+        toast('Cliente guardado ✓')
+      }
+      setModal(false)
+      invalidateMany('clientes')
+    } catch (err) {
+      console.error('[Clientes.save]', err)
+      toast('Error: ' + (err.message || 'No se pudo guardar'))
+    } finally {
+      setSaving(false)
     }
-    setSaving(false); setModal(false)
-    invalidateMany('clientes')
   }
 
   async function eliminar(id, nombre) {

@@ -42,21 +42,30 @@ export default function Equipos() {
   async function save() {
     if (!form.nombre || !form.precio_dia) { toast('Nombre y precio son obligatorios'); return }
     setSaving(true)
-    const payload = {
-      nombre: form.nombre, especificacion: form.especificacion,
-      precio_dia: Number(form.precio_dia), stock: Number(form.stock) || 1,
-      costo_compra: Number(form.costo_compra) || 0,
-      costo_operacional_dia: Number(form.costo_operacional_dia) || 0,
+    try {
+      const payload = {
+        nombre: form.nombre, especificacion: form.especificacion,
+        precio_dia: Number(form.precio_dia), stock: Number(form.stock) || 1,
+        costo_compra: Number(form.costo_compra) || 0,
+        costo_operacional_dia: Number(form.costo_operacional_dia) || 0,
+      }
+      if (form.id) {
+        const { error } = await supabase.from('equipos').update(payload).eq('id', form.id)
+        if (error) throw new Error(error.message)
+        toast('Equipo actualizado ✓')
+      } else {
+        const { error } = await supabase.from('equipos').insert({ ...payload, rentados: 0 })
+        if (error) throw new Error(error.message)
+        toast('Equipo agregado ✓')
+      }
+      setModal(false)
+      invalidate('equipos')
+    } catch (err) {
+      console.error('[Equipos.save]', err)
+      toast('Error: ' + (err.message || 'No se pudo guardar'))
+    } finally {
+      setSaving(false)
     }
-    if (form.id) {
-      await supabase.from('equipos').update(payload).eq('id', form.id)
-      toast('Equipo actualizado')
-    } else {
-      await supabase.from('equipos').insert({ ...payload, rentados: 0 })
-      toast('Equipo agregado')
-    }
-    setSaving(false); setModal(false)
-    invalidate('equipos')
   }
 
   async function eliminar(id, nombre) {

@@ -52,19 +52,49 @@ export default function Combos() {
     if (!form.nombre) { toast('Nombre es obligatorio'); return }
     if (form.equiposIds.length < 2) { toast('Selecciona al menos 2 equipos'); return }
     setSaving(true)
-    const payload = { nombre: form.nombre, descripcion: form.descripcion, descuento_porcentaje: Number(form.descuento_porcentaje) || 0 }
-    let comboId = form.id
-    if (form.id) {
-      await supabase.from('combos').update(payload).eq('id', form.id)
-      await supabase.from('combo_equipos').delete().eq('combo_id', form.id)
-    } else {
-      const { data } = await supabase.from('combos').insert(payload).select().single()
-      comboId = data.id
+    try {
+      const payload = {
+        nombre: form.nombre,
+        descripcion: form.descripcion,
+        descuento_porcentaje: Number(form.descuento_porcentaje) || 0,
+      }
+      let comboId = form.id
+
+      if (form.id) {
+        // ── Editar combo existente ──
+        const { error: errUpdate } = await supabase.from('combos').update(payload).eq('id', form.id)
+        if (errUpdate) throw new Error('No se pudo actualizar la oferta: ' + errUpdate.message)
+
+        const { error: errDel } = await supabase.from('combo_equipos').delete().eq('combo_id', form.id)
+        if (errDel) throw new Error('Error limpiando equipos anteriores: ' + errDel.message)
+      } else {
+        // ── Crear nuevo combo ──
+        const { data, error: errInsert } = await supabase
+          .from('combos').insert(payload).select().single()
+
+        if (errInsert) throw new Error('No se pudo crear la oferta: ' + errInsert.message)
+        if (!data?.id) throw new Error('Supabase no devolvió el ID del nuevo combo.')
+
+        comboId = data.id
+      }
+
+      // ── Insertar relaciones equipo ──
+      const { error: errEq } = await supabase
+        .from('combo_equipos')
+        .insert(form.equiposIds.map(eid => ({ combo_id: comboId, equipo_id: eid })))
+
+      if (errEq) throw new Error('Error guardando equipos del combo: ' + errEq.message)
+
+      toast(form.id ? 'Oferta actualizada ✓' : 'Oferta creada ✓')
+      setModal(false)
+      invalidateMany('combos')
+    } catch (err) {
+      console.error('[Combos.save]', err)
+      toast('Error: ' + (err.message || 'No se pudo guardar'))
+    } finally {
+      // SIEMPRE libera el botón, aunque falle
+      setSaving(false)
     }
-    await supabase.from('combo_equipos').insert(form.equiposIds.map(eid => ({ combo_id: comboId, equipo_id: eid })))
-    toast(form.id ? 'Oferta actualizada' : 'Oferta creada')
-    setSaving(false); setModal(false)
-    invalidateMany('combos')
   }
 
   async function eliminar(id, nombre) {
