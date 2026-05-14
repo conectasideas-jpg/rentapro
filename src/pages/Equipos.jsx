@@ -29,7 +29,8 @@ const EMPTY = { nombre: '', especificacion: '', precio_dia: '', stock: 1, costo_
 export default function Equipos() {
   const { usuario } = useAuth()
   const isAdmin = usuario?.rol === 'admin'
-  const { data: equipos = [], loading } = useQuery('equipos', fetchEquipos)
+  const { data: equiposRaw, loading } = useQuery('equipos', fetchEquipos)
+  const equipos = equiposRaw || []
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)

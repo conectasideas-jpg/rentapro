@@ -18,8 +18,10 @@ const EMPTY = { nombre: '', descripcion: '', descuento_porcentaje: 10, equiposId
 export default function Combos() {
   const { usuario } = useAuth()
   const isAdmin = usuario?.rol === 'admin'
-  const { data: combos = [], loading: loadCb } = useQuery('combos', fetchCombos)
-  const { data: equipos = [], loading: loadEq } = useQuery('equipos-basic', fetchEquiposBasic)
+  const { data: combosRaw, loading: loadCb } = useQuery('combos', fetchCombos)
+  const { data: equiposRaw, loading: loadEq } = useQuery('equipos-basic', fetchEquiposBasic)
+  const combos = combosRaw || []
+  const equipos = equiposRaw || []
   const loading = loadCb || loadEq
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(EMPTY)

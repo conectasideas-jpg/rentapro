@@ -18,12 +18,17 @@ export default function Dashboard() {
   const { usuario, can } = useAuth()
   const navigate = useNavigate()
 
-  const { data: arriendos = [], loading: loadArr } = useQuery('arriendos-activos', fetchArriendosActivos)
-  const { data: clientes = [], loading: loadCli } = useQuery('clientes', fetchClientes)
-  const { data: pendientes = [], loading: loadPend } = useQuery(
+  const { data: arriendosRaw, loading: loadArr } = useQuery('arriendos-activos', fetchArriendosActivos)
+  const { data: clientesRaw, loading: loadCli } = useQuery('clientes', fetchClientes)
+  const { data: pendientesRaw, loading: loadPend } = useQuery(
     'usuarios-pendientes', fetchUsuariosPendientes,
     { enabled: usuario?.rol === 'admin' }
   )
+
+  // Guards explícitos — evita crash si el caché aún devuelve null
+  const arriendos = arriendosRaw || []
+  const clientes = clientesRaw || []
+  const pendientes = pendientesRaw || []
 
   const loading = loadArr || loadCli
 

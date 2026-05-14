@@ -20,7 +20,8 @@ const EMPTY = { nombre: '', telefono: '', rut: '', comuna: '', direccion: '' }
 export default function Clientes() {
   const { usuario, can } = useAuth()
   const isAdmin = usuario?.rol === 'admin'
-  const { data: clientes = [], loading } = useQuery('clientes', fetchClientes)
+  const { data: clientesRaw, loading } = useQuery('clientes', fetchClientes)
+  const clientes = clientesRaw || []
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)

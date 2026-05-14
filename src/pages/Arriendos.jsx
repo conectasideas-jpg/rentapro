@@ -25,10 +25,14 @@ export default function Arriendos() {
   const isAdmin = usuario?.rol === 'admin'
 
   // ─── Caché: si Dashboard ya cargó arriendos/clientes, aquí son instantáneos ───
-  const { data: arriendos = [], loading: loadArr } = useQuery('arriendos', fetchArriendos)
-  const { data: clientes = [], loading: loadCli } = useQuery('clientes', fetchClientes)
-  const { data: equipos = [], loading: loadEq } = useQuery('equipos-basic', fetchEquiposBasic)
-  const { data: combos = [], loading: loadCb } = useQuery('combos', fetchCombos)
+  const { data: arriendosRaw, loading: loadArr } = useQuery('arriendos', fetchArriendos)
+  const { data: clientesRaw, loading: loadCli } = useQuery('clientes', fetchClientes)
+  const { data: equiposRaw, loading: loadEq } = useQuery('equipos-basic', fetchEquiposBasic)
+  const { data: combosRaw, loading: loadCb } = useQuery('combos', fetchCombos)
+  const arriendos = arriendosRaw || []
+  const clientes = clientesRaw || []
+  const equipos = equiposRaw || []
+  const combos = combosRaw || []
 
   const loading = loadArr || loadCli || loadEq || loadCb
 
