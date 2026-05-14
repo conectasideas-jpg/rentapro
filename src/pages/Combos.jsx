@@ -92,7 +92,7 @@ export default function Combos() {
       invalidateMany('combos')
     } catch (err) {
       console.error('[Combos.save]', err)
-      toast('Error: ' + (err.message || 'No se pudo guardar'))
+      alert('ERROR SUPABASE: ' + (err.message || 'sin mensaje'))
     } finally {
       // SIEMPRE libera el botón, aunque falle
       setSaving(false)
