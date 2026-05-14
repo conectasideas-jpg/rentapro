@@ -1,9 +1,18 @@
-import { useEffect, useState } from 'react'
+/**
+ * Clientes.jsx — OPTIMIZADO
+ * 1. useQuery('clientes') → caché compartido con Arriendos y Dashboard
+ * 2. SkeletonTableRows → reemplaza spinner vacío
+ * 3. invalidateMany → invalida clientes en todas las páginas que lo usan
+ */
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useQuery, invalidateMany } from '../lib/cache'
+import { fetchClientes } from '../lib/fetchers'
 import { useAuth } from '../hooks/useAuth'
 import PageHeader from '../components/PageHeader'
 import Modal from '../components/Modal'
 import { toast } from '../components/Toast'
+import { SkeletonTableRows } from '../components/Skeleton'
 
 const fmt = n => '$' + Math.round(n || 0).toLocaleString('es-CL')
 const EMPTY = { nombre: '', telefono: '', rut: '', comuna: '', direccion: '' }
@@ -11,20 +20,10 @@ const EMPTY = { nombre: '', telefono: '', rut: '', comuna: '', direccion: '' }
 export default function Clientes() {
   const { usuario, can } = useAuth()
   const isAdmin = usuario?.rol === 'admin'
-  const [clientes, setClientes] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { data: clientes = [], loading } = useQuery('clientes', fetchClientes)
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => { load() }, [])
-
-  async function load() {
-    setLoading(true)
-    const { data } = await supabase.from('clientes').select('*').order('nombre')
-    setClientes(data || [])
-    setLoading(false)
-  }
 
   function openNew() { setForm(EMPTY); setModal(true) }
   function openEdit(c) { setForm(c); setModal(true) }
@@ -40,38 +39,44 @@ export default function Clientes() {
       await supabase.from('clientes').insert({ ...payload, n_arriendos: 0, total_pagado: 0 })
       toast('Cliente guardado')
     }
-    setSaving(false)
-    setModal(false)
-    load()
+    setSaving(false); setModal(false)
+    invalidateMany('clientes')
   }
 
   async function eliminar(id, nombre) {
     if (!confirm(`¿Eliminar al cliente "${nombre}"?`)) return
     await supabase.from('clientes').delete().eq('id', id)
     toast('Cliente eliminado')
-    load()
+    invalidateMany('clientes')
   }
 
   const f = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <PageHeader title="Clientes" actions={
-        can('clientes') && <button className="btn btn-primary" onClick={openNew}><i className="ti ti-plus" /> Nuevo cliente</button>
-      } />
+      <PageHeader title="Clientes" count={loading ? null : clientes.length}
+        actions={can('clientes') && <button className="btn btn-primary" onClick={openNew}><i className="ti ti-plus" /> Nuevo cliente</button>}
+      />
       <div style={{ flex: 1, overflow: 'auto', padding: '20px 22px' }}>
         <div className="tcard">
-          {loading ? <div style={{ padding: 40, textAlign: 'center' }}><div className="spinner" /></div> : (
-            <table>
-              <thead><tr>
-                <th style={{ width: '22%' }}>Nombre</th><th style={{ width: '15%' }}>Teléfono</th>
-                <th style={{ width: '13%' }}>RUT</th><th style={{ width: '15%' }}>Comuna</th>
-                <th style={{ width: '10%' }}>Arriendos</th><th style={{ width: '14%' }}>Total pagado</th>
-                <th style={{ width: '11%' }}>Acciones</th>
-              </tr></thead>
+          <table>
+            <thead><tr>
+              <th style={{ width: '22%' }}>Nombre</th>
+              <th style={{ width: '15%' }}>Teléfono</th>
+              <th style={{ width: '13%' }}>RUT</th>
+              <th style={{ width: '15%' }}>Comuna</th>
+              <th style={{ width: '10%' }}>Arriendos</th>
+              <th style={{ width: '14%' }}>Total pagado</th>
+              <th style={{ width: '11%' }}>Acciones</th>
+            </tr></thead>
+            {loading ? (
+              <SkeletonTableRows rows={5} cols={7} />
+            ) : (
               <tbody>
                 {clientes.length === 0 ? (
-                  <tr><td colSpan={7}><div className="empty-state"><i className="ti ti-user-x" style={{ fontSize: 36, display: 'block', marginBottom: 8 }} />Sin clientes registrados</div></td></tr>
+                  <tr><td colSpan={7}>
+                    <div className="empty-state"><i className="ti ti-user-x" style={{ fontSize: 36, display: 'block', marginBottom: 8 }} />Sin clientes registrados</div>
+                  </td></tr>
                 ) : clientes.map(c => (
                   <tr key={c.id}>
                     <td><strong>{c.nombre}</strong></td>
@@ -89,8 +94,8 @@ export default function Clientes() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          )}
+            )}
+          </table>
         </div>
       </div>
 
