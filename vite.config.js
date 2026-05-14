@@ -11,7 +11,9 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'logo.svg', 'icon-192.png', 'icon-512.png'],
       workbox: {
         cleanupOutdatedCaches: true,
-        navigateFallback: '/'
+        navigateFallback: '/',
+        skipWaiting: true,     // ← aplica el nuevo SW inmediatamente sin esperar
+        clientsClaim: true,    // ← toma control de todas las pestañas al instante
       },
       manifest: {
         name: 'RentaPro',
@@ -22,21 +24,9 @@ export default defineConfig({
         background_color: '#0f172a',
         theme_color: '#22c55e',
         icons: [
-          {
-            src: '/logo.svg',
-            sizes: 'any',
-            type: 'image/svg+xml'
-          },
-          {
-            src: '/icon-192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+          { src: '/logo.svg', sizes: 'any', type: 'image/svg+xml' },
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' }
         ]
       }
     })
