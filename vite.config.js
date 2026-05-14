@@ -12,8 +12,18 @@ export default defineConfig({
       workbox: {
         cleanupOutdatedCaches: true,
         navigateFallback: '/',
-        skipWaiting: true,     // ← aplica el nuevo SW inmediatamente sin esperar
-        clientsClaim: true,    // ← toma control de todas las pestañas al instante
+        skipWaiting: true,
+        clientsClaim: true,
+        // ← Ignora TODAS las peticiones externas (Supabase API, auth, storage)
+        // Sin esto el SW las intercepta y las bloquea
+        navigateFallbackDenylist: [/^\/api/, /^https:\/\//],
+        runtimeCaching: [
+          {
+            // Deja pasar todo lo que vaya a Supabase sin tocar
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: 'NetworkOnly',
+          },
+        ],
       },
       manifest: {
         name: 'RentaPro',
